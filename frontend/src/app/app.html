@@ -1,0 +1,71 @@
+<div class="app-frame">
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="https://registrocivil.slp.gob.mx/" class="government-logo" aria-label="Portal del Registro Civil de San Luis Potosí">
+        <img src="https://d3dac9gdq8t83x.cloudfront.net/media/static/images/hor-verde.png" alt="Gobierno del Estado de San Luis Potosí">
+      </a>
+      <div class="institution-name"><span>Gobierno del Estado</span><strong>Registro Civil de San Luis Potosí</strong><small>Dirección del Registro Civil</small></div>
+    </div>
+  </header>
+
+  <main class="verification-main container">
+    <section class="page-intro">
+      <span class="eyebrow">SERVICIOS EN LÍNEA · SAN LUIS POTOSÍ</span>
+      <h1>Verificación de actas de nacimiento</h1>
+      <p>Consulta la autenticidad de un acta expedida en San Luis Potosí con el identificador y la cadena impresos en el documento.</p>
+    </section>
+    <div class="verification-layout">
+      <section class="acta-preview" aria-label="Resultado de la consulta">
+        @if (cargando) {
+          <div class="loading-state" role="status"><div class="acta-spinner" aria-hidden="true"></div><strong>Consultando acta</strong><span>Estamos preparando la consulta…</span></div>
+        } @else if (mensajeConsulta) {
+          <div class="result-message" role="status"><span class="result-icon"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span><h2>Consulta en preparación</h2><p>{{ mensajeConsulta }}</p></div>
+        } @else {
+          <div class="empty-state">
+            <span class="document-icon"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span>
+            <h2>El resultado aparecerá aquí</h2>
+            <div class="secure-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Consulta protegida por el Registro Civil</div>
+          </div>
+        }
+      </section>
+
+      <form class="search-card" (submit)="buscar($event)" #formulario="ngForm">
+        <div class="search-card-heading"><span class="heading-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span><div><span>CONSULTA DE ACTA</span><h2>Búsqueda por identificador electrónico</h2></div></div>
+        <div class="search-fields">
+          <label for="identifier">Identificador electrónico</label>
+          <input id="identifier" name="identifier" type="text" autocomplete="off" inputmode="numeric" maxlength="20" minlength="20" pattern="[0-9]{20}" required
+            placeholder="Ingresa el identificador" [(ngModel)]="identificador" #identifierModel="ngModel">
+          @if (identifierModel.invalid && (identifierModel.dirty || identifierModel.touched)) {
+            <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { El identificador debe contener exactamente 20 números. }</small>
+          }
+
+          <label for="act-chain">Cadena del acta</label>
+          <input id="act-chain" name="act-chain" type="text" autocomplete="off" inputmode="numeric" maxlength="20" minlength="20" pattern="[0-9]{20}" required
+            placeholder="Ingresa la cadena del acta" [(ngModel)]="cadenaActa" #cadenaModel="ngModel">
+          @if (cadenaModel.invalid && (cadenaModel.dirty || cadenaModel.touched)) {
+            <small class="validation-error">@if (cadenaModel.errors?.['required']) { Es necesario proporcionar la cadena del acta. } @else { La cadena del acta debe contener exactamente 20 números. }</small>
+          }
+
+          <label class="captcha-label" for="captcha-entry">Código de verificación</label>
+          <input id="captcha-entry" name="captcha-entry" type="text" autocomplete="off" maxlength="12" required
+            placeholder="Escribe el código mostrado" [(ngModel)]="codigoVerificacion">
+          <div class="captcha-preview" aria-label="Vista previa del espacio para CAPTCHA; aún no valida respuestas"><span class="captcha-noise" aria-hidden="true">CAPTCHA</span><span class="captcha-actions" aria-hidden="true"><i class="fa-solid fa-rotate"></i><i class="fa-solid fa-volume-high"></i></span></div>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="cancelar()"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Cancelar</button>
+            <button type="submit" class="btn-search" [disabled]="cargando"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Buscar acta</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="mob-style-footer w-100 mt-auto">
+    <div class="container"><div class="row justify-content-start">
+      <div class="col-12 col-sm-6 col-lg-3 mb-4 text-center text-sm-start"><img src="https://d3dac9gdq8t83x.cloudfront.net/media/static/images/hor-blanco.png" alt="Gobierno del Estado SLP" class="img-fluid footer-logo"><ul class="list mt-4"><li class="footer-bold"><i class="fa-solid fa-calendar-days me-2"></i>Fecha de Actualización: 17/02/2026</li><li class="footer-bold"><a href="#"><i class="fa-solid fa-circle-question me-2"></i>Preguntas Frecuentes</a></li></ul></div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4"><h5 class="mbr-section-subtitle">Sitios Recomendados</h5><ul class="list"><li><a href="#">RENAPO</a></li><li><a href="#">Consulta CURP</a></li><li><a href="#">Acta de Nacimiento en línea</a></li><li><a href="#">Aviso de Privacidad Integral SGG</a></li></ul></div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4"><h5 class="mbr-section-subtitle">Números de Emergencia</h5><ul class="list"><li><a href="#">Protección Civil - 4448143028</a></li><li><a href="#">Bomberos - 4448153583</a></li><li><a href="#">Cruz Roja - 4448157314</a></li><li><a href="#">Denuncia Anónima - 089</a></li><li><a href="#">Emergencias - 911</a></li></ul></div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4"><h5 class="mbr-section-subtitle">Contáctanos</h5><ul class="list"><li><a href="#">4441009000</a></li><li><a href="#">sgg.drc&#64;slp.gob.mx</a></li><li class="mt-3"><a href="#">Bolívar N° 965, Colonia San Luis<br>Potosí Centro, C.P. 78000, San Luis<br>Potosí, San Luis Potosí</a></li></ul></div>
+    </div></div>
+    <nav class="px-3 py-3 slpColors-bg-g1 text-white"><div class="container footer-bottom d-flex flex-wrap align-items-center justify-content-between"><div class="footer-legal">v4.1.9 &copy; 2026 Todos los derechos reservados | <a href="#" class="text-white text-decoration-none">Aviso de Privacidad</a> | <a href="#" class="text-white text-decoration-none">Contactar al Web Master</a></div></div></nav>
+  </footer>
+</div>
