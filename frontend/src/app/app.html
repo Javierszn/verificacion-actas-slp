@@ -11,15 +11,124 @@
   <main class="verification-main container">
     <section class="page-intro">
       <span class="eyebrow">SERVICIOS EN LÍNEA · SAN LUIS POTOSÍ</span>
-      <h1>Verificación de actas de nacimiento</h1>
+      <h1>Verificación de actas</h1>
       <p>Consulta la autenticidad de un acta expedida en San Luis Potosí con el identificador y la cadena impresos en el documento.</p>
     </section>
     <div class="verification-layout">
-      <section class="acta-preview" aria-label="Resultado de la consulta">
+      <section class="acta-preview" [class.has-result]="resultadoActa" aria-label="Resultado de la consulta">
         @if (cargando) {
           <div class="loading-state" role="status"><div class="acta-spinner" aria-hidden="true"></div><strong>Consultando acta</strong><span>Estamos preparando la consulta…</span></div>
+        } @else if (resultadoActa) {
+          <article class="acta-document" aria-label="Datos del registro consultado">
+            <div class="document-band">REGISTRO</div>
+            <div class="document-summary">
+              <div class="document-summary-title"><strong>Estados Unidos Mexicanos</strong><span>Extracto de</span><b>Acta de {{ tituloActa }}</b></div>
+              <div class="document-summary-meta">
+                @if (tipoActa === 'nacimiento') {
+                  <div><span>Clave Única de Registro de Población</span><strong>{{ datoActa('CURP') }}</strong></div>
+                  <div><span>Certificado de nacimiento</span><strong>{{ datoActa('CERTIFICADO') }}</strong></div>
+                } @else if (tipoActa === 'matrimonio') {
+                  <div><span>Clave Única de Registro de Población · 1er cónyuge</span><strong>{{ datoActa('curp_cty1') }}</strong></div>
+                  <div><span>Clave Única de Registro de Población · 2do cónyuge</span><strong>{{ datoActa('curp_cty2') }}</strong></div>
+                } @else if (tipoActa === 'defuncion') {
+                  <div><span>CURP</span><strong>{{ datoActa('curp_reg') }}</strong></div>
+                  <div><span>Certificado</span><strong>{{ datoActa('certificado') }}</strong></div>
+                } @else {
+                  <div><span>CURP · 1er registrado</span><strong>{{ datoActa('curp_div1') }}</strong></div>
+                  <div><span>CURP · 2do registrado</span><strong>{{ datoActa('curp_div2') }}</strong></div>
+                }
+              </div>
+            </div>
+            <div class="document-place"><strong>Lugar de Registro</strong><span>{{ lugarRegistro() }}</span></div>
+
+            @if (tipoActa === 'nacimiento') {
+            <section class="document-section">
+              <h3>Datos de la Persona Registrada</h3>
+              <div class="document-data-grid three-columns">
+                <div><strong>{{ datoActa('NOMBRE_REG') }}</strong><span>Nombre(s)</span></div>
+                <div><strong>{{ datoActa('PRIMER_AP_REG') }}</strong><span>Primer Apellido</span></div>
+                <div><strong>{{ datoActa('SEGUNDO_AP_REG') }}</strong><span>Segundo Apellido</span></div>
+                <div><strong>{{ datoActa('SEXO') }}</strong><span>Sexo</span></div>
+                <div><strong>{{ datoActa('FECHA_NAC') }}</strong><span>Fecha de Nacimiento</span></div>
+                <div><strong>{{ lugarNacimiento() }}</strong><span>Lugar de Nacimiento</span></div>
+              </div>
+            </section>
+
+            <section class="document-section">
+              <h3>Datos de Filiación de la Persona Registrada</h3>
+              <div class="document-data-grid five-columns">
+                <div><strong>{{ datoActa('NOMBRE_PADRE') }}</strong><span>Nombre(s)</span></div>
+                <div><strong>{{ datoActa('PRIMER_AP_PADRE') }}</strong><span>Primer Ap.</span></div>
+                <div><strong>{{ datoActa('SEGUNDO_AP_PADRE') }}</strong><span>Segundo Ap.</span></div>
+                <div><strong>{{ datoActa('NACIONALIDAD_PADRE') }}</strong><span>Nacionalidad</span></div>
+                <div><strong>{{ datoActa('CURP_PADRE') }}</strong><span>CURP</span></div>
+                <div><strong>{{ datoActa('NOMBRE_MADRE') }}</strong><span>Nombre(s)</span></div>
+                <div><strong>{{ datoActa('PRIMER_AP_MADRE') }}</strong><span>Primer Ap.</span></div>
+                <div><strong>{{ datoActa('SEGUNDO_AP_MADRE') }}</strong><span>Segundo Ap.</span></div>
+                <div><strong>{{ datoActa('NACIONALIDAD_MADRE') }}</strong><span>Nacionalidad</span></div>
+                <div><strong>{{ datoActa('CURP_MADRE') }}</strong><span>CURP</span></div>
+              </div>
+            </section>
+            } @else if (tipoActa === 'matrimonio') {
+              <section class="document-section">
+                <h3>Datos de los contrayentes</h3>
+                <div class="document-data-grid three-columns">
+                  <div><strong>{{ datoActa('nombre_cty1') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_cty1') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_cty1') }}</strong><span>Segundo Apellido</span></div>
+                  <div><strong>{{ datoActa('sexoR') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('edad_cty1') }}</strong><span>Edad</span></div>
+                  <div class="full-row"><strong>{{ lugarNacimientoConyuge('cty1') }}</strong><span>Lugar de Nacimiento</span></div>
+                  <div><strong>{{ datoActa('nombre_cty2') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_cty2') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_cty2') }}</strong><span>Segundo Apellido</span></div>
+                  <div><strong>{{ datoActa('sexoCy2') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty2') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('edad_cty2') }}</strong><span>Edad</span></div>
+                  <div class="full-row"><strong>{{ lugarNacimientoConyuge('cty2') }}</strong><span>Lugar de Nacimiento</span></div>
+                </div>
+              </section>
+              <section class="document-section"><h3>Datos del acto de matrimonio</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('ENTIDAD_REG') }}</strong><span>Entidad Federativa</span></div><div><strong>{{ datoActa('MUNICIPIO_REG') }}</strong><span>Municipio</span></div><div><strong>{{ datoActa('FECHA_REG') }}</strong><span>Fecha de inscripción</span></div><div class="full-row"><strong>{{ datoActa('regimen_mat') }}</strong><span>Régimen matrimonial</span></div></div></section>
+            } @else if (tipoActa === 'defuncion') {
+              <section class="document-section"><h3>Datos de la Persona Fallecida</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_reg') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_reg') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_reg') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('edo_civil') }}</strong><span>Estado civil</span></div><div><strong>{{ datoActa('nacionalidad') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('fecha_nac') }}</strong><span>Fecha de nacimiento</span></div><div class="full-row"><strong>{{ datoActa('localidad_nacimiento') }}, {{ datoActa('municipio_nacimiento') }}, {{ datoActa('entidad_nacimiento') }}</strong><span>Lugar de nacimiento</span></div></div></section>
+              <section class="document-section"><h3>Datos del acto de defunción</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('fecha_defuncion') }}</strong><span>Fecha de defunción</span></div><div><strong>{{ datoActa('hora') }}</strong><span>Hora</span></div><div><strong>{{ datoActa('donde_fallecio') }}</strong><span>Lugar de defunción</span></div><div><strong>{{ datoActa('destino_cadaver') }}</strong><span>Destino del cadáver</span></div><div class="full-row"><strong>{{ datoActa('causas_defuncion') }}</strong><span>Causas de defunción</span></div></div></section>
+            } @else {
+              <section class="document-section"><h3>Datos de los divorciados</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_div1') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div1') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div1') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo_div1') }}</strong><span>Sexo</span></div><div class="full-row"><strong>{{ datoActa('nacionalidad_div1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('nombre_div2') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div2') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div2') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo_div2') }}</strong><span>Sexo</span></div><div class="full-row"><strong>{{ datoActa('nacionalidad_div2') }}</strong><span>Nacionalidad</span></div></div></section>
+              <section class="document-section"><h3>Datos del acto de divorcio</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('ENTIDAD_REG') }}</strong><span>Entidad Federativa</span></div><div><strong>{{ datoActa('MUNICIPIO_REG') }}</strong><span>Municipio</span></div><div><strong>{{ datoActa('fecha_resolucion') }}</strong><span>Fecha</span></div><div class="full-row"><strong>{{ datoActa('via_disolucion') }}</strong><span>Vía de disolución</span></div></div></section>
+            }
+
+            <div class="document-split">
+              <section class="document-box">
+                <h3>Anotaciones Marginales</h3>
+                @if (hayNotas) {
+                  <p>{{ datoActa('notas_marginales') }}</p>
+                  <button type="button" class="notes-open" aria-label="Ver anotaciones completas" (click)="notasAbiertas = true"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                } @else { <p>Sin anotaciones marginales.</p> }
+              </section>
+              <section class="document-box">
+                <h3>Certificación</h3>
+                <p>Se extiende la presente copia certificada, con fundamento en los artículos 2, 18, 29 fracción VIII y 61 de la Ley del Registro Civil del Estado de San Luis Potosí y el artículo 51 del Reglamento de la Ley del Registro Civil del Estado de San Luis Potosí.</p>
+              </section>
+            </div>
+
+            @if (tipoActa === 'nacimiento') { <section class="document-box transcription-box"><h3>Transcripción</h3><p>Sin transcripción adicional.</p></section> }
+            <div class="document-data-grid two-columns document-bottom-row">
+              <div><span>Cadena del Acta</span><strong>{{ datoActa('folio') }}</strong></div>
+              <div><span>Fecha de Registro</span><strong>{{ datoActa('FECHA_REG') }}</strong></div>
+            </div>
+            <div class="document-data-grid five-columns document-bottom-row">
+              <div><span>Oficialía</span><strong>{{ datoActa('OFICIALIA') }}</strong></div>
+              <div><span>Libro</span><strong>{{ datoActa('LIBRO') }}</strong></div>
+              <div><span>Foja</span><strong>—</strong></div>
+              <div><span>Tomo</span><strong>—</strong></div>
+              <div><span>Acta</span><strong>{{ datoActa('ACTA_NUM') }}</strong></div>
+            </div>
+            <p class="document-footnote"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Consulta de verificación · Registro Civil de San Luis Potosí</p>
+          </article>
+          @if (notasAbiertas) {
+            <div class="notes-backdrop" role="presentation" (click)="notasAbiertas = false">
+              <section class="notes-dialog" role="dialog" aria-modal="true" aria-labelledby="notes-title" (click)="$event.stopPropagation()">
+                <header><h2 id="notes-title">Notas</h2><button type="button" aria-label="Cerrar notas" (click)="notasAbiertas = false">×</button></header>
+                <p>{{ datoActa('notas_marginales') }}</p>
+                <footer><button type="button" (click)="notasAbiertas = false">Cerrar</button></footer>
+              </section>
+            </div>
+          }
         } @else if (mensajeConsulta) {
-          <div class="result-message" role="status"><span class="result-icon"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span><h2>Consulta en preparación</h2><p>{{ mensajeConsulta }}</p></div>
+          <div class="result-message" role="status"><span class="result-icon"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span><h2>Resultado de la búsqueda</h2><p>{{ mensajeConsulta }}</p></div>
         } @else {
           <div class="empty-state">
             <span class="document-icon"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span>
@@ -33,15 +142,15 @@
         <div class="search-card-heading"><span class="heading-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span><div><span>CONSULTA DE ACTA</span><h2>Búsqueda por identificador electrónico</h2></div></div>
         <div class="search-fields">
           <label for="identifier">Identificador electrónico</label>
-          <input id="identifier" name="identifier" type="text" autocomplete="off" inputmode="numeric" maxlength="20" minlength="20" pattern="[0-9]{20}" required
-            placeholder="Ingresa el identificador" [(ngModel)]="identificador" #identifierModel="ngModel">
+          <input id="identifier" name="identifier" type="text" autocomplete="off" autocapitalize="characters" maxlength="8" minlength="8" pattern="[A-Za-z0-9]{8}" required
+            placeholder="Ej. DD348501" [(ngModel)]="identificador" #identifierModel="ngModel">
           @if (identifierModel.invalid && (identifierModel.dirty || identifierModel.touched)) {
-            <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { El identificador debe contener exactamente 20 números. }</small>
+            <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { El identificador debe contener exactamente 8 caracteres alfanuméricos. }</small>
           }
 
-          <label for="act-chain">Cadena del acta</label>
+          <label for="act-chain">Folio / código de verificación del acta</label>
           <input id="act-chain" name="act-chain" type="text" autocomplete="off" inputmode="numeric" maxlength="20" minlength="20" pattern="[0-9]{20}" required
-            placeholder="Ingresa la cadena del acta" [(ngModel)]="cadenaActa" #cadenaModel="ngModel">
+            placeholder="Ingresa los 20 dígitos" [(ngModel)]="cadenaActa" #cadenaModel="ngModel">
           @if (cadenaModel.invalid && (cadenaModel.dirty || cadenaModel.touched)) {
             <small class="validation-error">@if (cadenaModel.errors?.['required']) { Es necesario proporcionar la cadena del acta. } @else { La cadena del acta debe contener exactamente 20 números. }</small>
           }
