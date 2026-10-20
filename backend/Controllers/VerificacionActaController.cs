@@ -12,7 +12,7 @@ public sealed class VerificacionActaController(
     ILogger<VerificacionActaController> logger,
     IWebHostEnvironment environment) : ControllerBase
 {
-    private static readonly Regex IdentifierPattern = new("^[A-Za-z0-9]{8}$", RegexOptions.Compiled);
+    private static readonly Regex IdentifierPattern = new("^[A-Za-z]{2}[0-9]{1,9}$", RegexOptions.Compiled);
     private static readonly Regex FolioPattern = new("^[0-9]{20}$", RegexOptions.Compiled);
 
     private static readonly IReadOnlyDictionary<string, string> Queries = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -35,8 +35,7 @@ public sealed class VerificacionActaController(
             || !FolioPattern.IsMatch(request.CadenaActa ?? ""))
             return BadRequest(new { mensaje = "Los datos de búsqueda no tienen un formato válido." });
 
-        // El identificador electrónico de cajero lleva dos caracteres de prefijo;
-        // el GUID de las vistas corresponde al sufijo numérico.
+        // Las dos primeras letras identifican dirección/cajero; el sufijo de 1-9 dígitos es el GUID.
         var guid = request.Identificador![2..];
         try
         {
@@ -53,7 +52,15 @@ public sealed class VerificacionActaController(
                 for (var i = 0; i < reader.FieldCount; i++)
                     acta[reader.GetName(i)] = await reader.IsDBNullAsync(i, cancellationToken) ? null : reader.GetValue(i);
 
-                return Ok(new { tipoActa, acta });
+                // Las inscripciones están incluidas en la vista de nacimiento;
+                // se distinguen por la anotación que identifica el trámite.
+                var tipoEncontrado = tipoActa;
+                if (tipoEncontrado == "nacimiento" && EsInscripcionNacimiento(acta))
+                {
+                    tipoEncontrado = "inscripcionNacimiento";
+                }
+
+                return Ok(new { tipoActa = tipoEncontrado, acta });
             }
 
             return NotFound(new { mensaje = "No se encontró un acta que coincida con los datos proporcionados." });
@@ -64,6 +71,18 @@ public sealed class VerificacionActaController(
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { mensaje = "No fue posible consultar el servicio de actas.", detail = "Intenta nuevamente más tarde." });
         }
+    }
+
+    private static bool EsInscripcionNacimiento(IReadOnlyDictionary<string, object?> acta)
+    {
+        return acta.Any(campo =>
+            (campo.Key.Contains("nota", StringComparison.OrdinalIgnoreCase)
+                || campo.Key.Contains("transcrip", StringComparison.OrdinalIgnoreCase)
+                || campo.Key.Contains("inscrip", StringComparison.OrdinalIgnoreCase)
+                || campo.Key.Contains("tipo", StringComparison.OrdinalIgnoreCase))
+            && campo.Value is not null
+            && (campo.Value.ToString()!.Contains("INSCRIPCI", StringComparison.OrdinalIgnoreCase)
+                || campo.Value.ToString()!.Contains("INSCRIB", StringComparison.OrdinalIgnoreCase)));
     }
 }
 

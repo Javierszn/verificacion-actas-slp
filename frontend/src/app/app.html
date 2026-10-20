@@ -22,79 +22,99 @@
           <article class="acta-document" aria-label="Datos del registro consultado">
             <div class="document-band">REGISTRO</div>
             <div class="document-summary">
-              <div class="document-summary-title"><strong>Estados Unidos Mexicanos</strong><span>Extracto de</span><b>Acta de {{ tituloActa }}</b></div>
+              <div class="document-summary-title"><strong>Estados Unidos Mexicanos</strong>
+                @if (esInscripcionNacimiento) {
+                  <span>Extracto de inscripción de</span><b>Nacimiento</b>
+                } @else {
+                  <span>Extracto de</span><b>Acta de {{ tituloActa }}</b>
+                }
+              </div>
               <div class="document-summary-meta">
-                @if (tipoActa === 'nacimiento') {
-                  <div><span>Clave Única de Registro de Población</span><strong>{{ datoActa('CURP') }}</strong></div>
+                @if (tipoActa === 'nacimiento' || tipoActa === 'inscripcionNacimiento') {
+                  <div><span>Clave Única de Registro de Población</span><strong>{{ datoActa('CURP', 'curp') }}</strong></div>
                   <div><span>Certificado de nacimiento</span><strong>{{ datoActa('CERTIFICADO') }}</strong></div>
                 } @else if (tipoActa === 'matrimonio') {
                   <div><span>Clave Única de Registro de Población · 1er cónyuge</span><strong>{{ datoActa('curp_cty1') }}</strong></div>
                   <div><span>Clave Única de Registro de Población · 2do cónyuge</span><strong>{{ datoActa('curp_cty2') }}</strong></div>
                 } @else if (tipoActa === 'defuncion') {
                   <div><span>CURP</span><strong>{{ datoActa('curp_reg') }}</strong></div>
-                  <div><span>Certificado</span><strong>{{ datoActa('certificado') }}</strong></div>
+                  <div><span>N.º de Certificado de defunción SSA</span><strong>{{ datoActa('certificado', 'numero_certificado') }}</strong></div>
+                  <div><span>Entidad de Registro</span><strong>{{ datoActa('ENTIDAD_REG', 'entidad_reg') }}</strong></div>
+                  <div><span>Municipio de Registro</span><strong>{{ datoActa('MUNICIPIO_REG', 'municipio_reg') }}</strong></div>
                 } @else {
                   <div><span>CURP · 1er registrado</span><strong>{{ datoActa('curp_div1') }}</strong></div>
                   <div><span>CURP · 2do registrado</span><strong>{{ datoActa('curp_div2') }}</strong></div>
                 }
               </div>
             </div>
-            <div class="document-place"><strong>Lugar de Registro</strong><span>{{ lugarRegistro() }}</span></div>
-
-            @if (tipoActa === 'nacimiento') {
-            <section class="document-section">
-              <h3>Datos de la Persona Registrada</h3>
-              <div class="document-data-grid three-columns">
-                <div><strong>{{ datoActa('NOMBRE_REG') }}</strong><span>Nombre(s)</span></div>
-                <div><strong>{{ datoActa('PRIMER_AP_REG') }}</strong><span>Primer Apellido</span></div>
-                <div><strong>{{ datoActa('SEGUNDO_AP_REG') }}</strong><span>Segundo Apellido</span></div>
-                <div><strong>{{ datoActa('SEXO') }}</strong><span>Sexo</span></div>
-                <div><strong>{{ datoActa('FECHA_NAC') }}</strong><span>Fecha de Nacimiento</span></div>
-                <div><strong>{{ lugarNacimiento() }}</strong><span>Lugar de Nacimiento</span></div>
+            @if (tipoActa === 'defuncion') {
+              <div class="document-record-header" aria-label="Datos de registro del acta de defunción">
+                <div><span>Oficialía</span><strong>{{ datoActa('nooficial', 'OFICIALIA', 'oficialia') }}</strong></div>
+                <div><span>Libro</span><strong>{{ datoActa('LIBRO', 'libro') }}</strong></div>
+                <div><span>Acta</span><strong>{{ datoActa('ACTA_NUM', 'ACTA', 'numero_acta') }}</strong></div>
+                <div><span>Fecha</span><strong>{{ datoActa('FECHA_REG', 'fecha_registro') }}</strong></div>
               </div>
-            </section>
+            }
+            @if (tipoActa !== 'defuncion') {
+              <div class="document-place"><strong>Lugar de Registro</strong><span>{{ lugarRegistro() }}</span></div>
+            }
+            @if (tipoActa === 'matrimonio' || tipoActa === 'divorcio') {
+              <div class="document-place"><strong>@if (tipoActa === 'matrimonio') { Fecha de inscripción del Matrimonio } @else { Fecha de inscripción }</strong><span>{{ datoActa('fecha_reg') }}</span></div>
+            }
 
-            <section class="document-section">
-              <h3>Datos de Filiación de la Persona Registrada</h3>
-              <div class="document-data-grid five-columns">
-                <div><strong>{{ datoActa('NOMBRE_PADRE') }}</strong><span>Nombre(s)</span></div>
-                <div><strong>{{ datoActa('PRIMER_AP_PADRE') }}</strong><span>Primer Ap.</span></div>
-                <div><strong>{{ datoActa('SEGUNDO_AP_PADRE') }}</strong><span>Segundo Ap.</span></div>
-                <div><strong>{{ datoActa('NACIONALIDAD_PADRE') }}</strong><span>Nacionalidad</span></div>
-                <div><strong>{{ datoActa('CURP_PADRE') }}</strong><span>CURP</span></div>
-                <div><strong>{{ datoActa('NOMBRE_MADRE') }}</strong><span>Nombre(s)</span></div>
-                <div><strong>{{ datoActa('PRIMER_AP_MADRE') }}</strong><span>Primer Ap.</span></div>
-                <div><strong>{{ datoActa('SEGUNDO_AP_MADRE') }}</strong><span>Segundo Ap.</span></div>
-                <div><strong>{{ datoActa('NACIONALIDAD_MADRE') }}</strong><span>Nacionalidad</span></div>
-                <div><strong>{{ datoActa('CURP_MADRE') }}</strong><span>CURP</span></div>
-              </div>
-            </section>
+            @if (tipoActa === 'nacimiento' || tipoActa === 'inscripcionNacimiento') {
+              <section class="document-section">
+                <h3>Datos de la Persona Registrada</h3>
+                <div class="document-data-grid three-columns">
+                  <div><strong>{{ datoActa('NOMBRE_REG') }}</strong><span>Nombre(s)</span></div>
+                  <div><strong>{{ datoActa('PRIMER_AP_REG') }}</strong><span>Primer Apellido</span></div>
+                  <div><strong>{{ datoActa('SEGUNDO_AP_REG') }}</strong><span>Segundo Apellido</span></div>
+                  <div><strong>{{ sexoActa('SEXO', 'sexo') }}</strong><span>Sexo</span></div>
+                  <div><strong>{{ datoActa('FECHA_NAC') }}</strong><span>Fecha de Nacimiento</span></div>
+                  <div><strong>{{ lugarNacimiento() }}</strong><span>Lugar de Nacimiento</span></div>
+                </div>
+              </section>
+              <section class="document-section">
+                <h3>Datos de Filiación de la Persona Registrada</h3>
+                <div class="document-data-grid five-columns">
+                  <div><strong>{{ datoActa('NOMBRE_PADRE') }}</strong><span>Nombre(s)</span></div>
+                  <div><strong>{{ datoActa('PRIMER_AP_PADRE') }}</strong><span>Primer Ap.</span></div>
+                  <div><strong>{{ datoActa('SEGUNDO_AP_PADRE') }}</strong><span>Segundo Ap.</span></div>
+                  <div><strong>{{ datoActa('NACIONALIDAD_PADRE') }}</strong><span>Nacionalidad</span></div>
+                  <div><strong>{{ datoActa('CURP_PADRE') }}</strong><span>CURP</span></div>
+                  <div><strong>{{ datoActa('NOMBRE_MADRE') }}</strong><span>Nombre(s)</span></div>
+                  <div><strong>{{ datoActa('PRIMER_AP_MADRE') }}</strong><span>Primer Ap.</span></div>
+                  <div><strong>{{ datoActa('SEGUNDO_AP_MADRE') }}</strong><span>Segundo Ap.</span></div>
+                  <div><strong>{{ datoActa('NACIONALIDAD_MADRE') }}</strong><span>Nacionalidad</span></div>
+                  <div><strong>{{ datoActa('CURP_MADRE') }}</strong><span>CURP</span></div>
+                </div>
+              </section>
             } @else if (tipoActa === 'matrimonio') {
               <section class="document-section">
                 <h3>Datos de los contrayentes</h3>
                 <div class="document-data-grid three-columns">
                   <div><strong>{{ datoActa('nombre_cty1') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_cty1') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_cty1') }}</strong><span>Segundo Apellido</span></div>
-                  <div><strong>{{ datoActa('sexoR') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('edad_cty1') }}</strong><span>Edad</span></div>
+                  <div><strong>{{ sexoActa('sexoR') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ edadConyuge('cty1') }}</strong><span>Edad</span></div>
                   <div class="full-row"><strong>{{ lugarNacimientoConyuge('cty1') }}</strong><span>Lugar de Nacimiento</span></div>
                   <div><strong>{{ datoActa('nombre_cty2') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_cty2') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_cty2') }}</strong><span>Segundo Apellido</span></div>
-                  <div><strong>{{ datoActa('sexoCy2') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty2') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('edad_cty2') }}</strong><span>Edad</span></div>
+                  <div><strong>{{ sexoActa('sexoCy2') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_cty2') }}</strong><span>Nacionalidad</span></div><div><strong>{{ edadConyuge('cty2') }}</strong><span>Edad</span></div>
                   <div class="full-row"><strong>{{ lugarNacimientoConyuge('cty2') }}</strong><span>Lugar de Nacimiento</span></div>
                 </div>
               </section>
               <section class="document-section"><h3>Datos del acto de matrimonio</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('ENTIDAD_REG') }}</strong><span>Entidad Federativa</span></div><div><strong>{{ datoActa('MUNICIPIO_REG') }}</strong><span>Municipio</span></div><div><strong>{{ datoActa('FECHA_REG') }}</strong><span>Fecha de inscripción</span></div><div class="full-row"><strong>{{ datoActa('regimen_mat') }}</strong><span>Régimen matrimonial</span></div></div></section>
             } @else if (tipoActa === 'defuncion') {
-              <section class="document-section"><h3>Datos de la Persona Fallecida</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_reg') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_reg') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_reg') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('edo_civil') }}</strong><span>Estado civil</span></div><div><strong>{{ datoActa('nacionalidad') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('fecha_nac') }}</strong><span>Fecha de nacimiento</span></div><div class="full-row"><strong>{{ datoActa('localidad_nacimiento') }}, {{ datoActa('municipio_nacimiento') }}, {{ datoActa('entidad_nacimiento') }}</strong><span>Lugar de nacimiento</span></div></div></section>
-              <section class="document-section"><h3>Datos del acto de defunción</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('fecha_defuncion') }}</strong><span>Fecha de defunción</span></div><div><strong>{{ datoActa('hora') }}</strong><span>Hora</span></div><div><strong>{{ datoActa('donde_fallecio') }}</strong><span>Lugar de defunción</span></div><div><strong>{{ datoActa('destino_cadaver') }}</strong><span>Destino del cadáver</span></div><div class="full-row"><strong>{{ datoActa('causas_defuncion') }}</strong><span>Causas de defunción</span></div></div></section>
+              <section class="document-section"><h3>Datos de la Persona Fallecida</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_reg') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_reg') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_reg') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ sexoActa('sexo') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('edo_civil') }}</strong><span>Estado civil</span></div><div><strong>{{ datoActa('fecha_nac') }}</strong><span>Fecha de nacimiento</span></div><div><strong>{{ lugarNacimientoDefuncion() }}</strong><span>Lugar de nacimiento</span></div><div><strong>{{ datoActa('entidad_reg', 'entidad_reg_nac', 'ent_reg_nac') }}</strong><span>Entidad de Registro de Nacimiento</span></div><div><strong>{{ datoActa('nacionalidad') }}</strong><span>Nacionalidad</span></div></div></section>
+              <section class="document-section"><h3>Datos de la Defunción de la Persona Fallecida</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('fecha_defuncion') }}</strong><span>Fecha</span></div><div><strong>{{ datoActa('hora', 'hora_defuncion') }}</strong><span>Hora</span></div><div><strong>{{ lugarDefuncion() }}</strong><span>Lugar</span></div><div><strong>{{ datoActa('destino_cadaver') }}</strong><span>Destino del Cadáver</span></div><div class="full-row"><strong>{{ datoActa('causas_defuncion') }}</strong><span>Causas de la Defunción</span></div></div></section>
             } @else {
-              <section class="document-section"><h3>Datos de los divorciados</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_div1') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div1') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div1') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo_div1') }}</strong><span>Sexo</span></div><div class="full-row"><strong>{{ datoActa('nacionalidad_div1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('nombre_div2') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div2') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div2') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ datoActa('sexo_div2') }}</strong><span>Sexo</span></div><div class="full-row"><strong>{{ datoActa('nacionalidad_div2') }}</strong><span>Nacionalidad</span></div></div></section>
-              <section class="document-section"><h3>Datos del acto de divorcio</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('ENTIDAD_REG') }}</strong><span>Entidad Federativa</span></div><div><strong>{{ datoActa('MUNICIPIO_REG') }}</strong><span>Municipio</span></div><div><strong>{{ datoActa('fecha_resolucion') }}</strong><span>Fecha</span></div><div class="full-row"><strong>{{ datoActa('via_disolucion') }}</strong><span>Vía de disolución</span></div></div></section>
+              <section class="document-section"><h3>Datos de los divorciados</h3><div class="document-data-grid three-columns"><div><strong>{{ datoActa('nombre_div1') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div1') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div1') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ sexoActa('sexo_div1') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_div1') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('curp_div1') }}</strong><span>CURP</span></div><div><strong>{{ datoActa('nombre_div2') }}</strong><span>Nombre(s)</span></div><div><strong>{{ datoActa('primer_ap_div2') }}</strong><span>Primer Apellido</span></div><div><strong>{{ datoActa('segundo_ap_div2') }}</strong><span>Segundo Apellido</span></div><div><strong>{{ sexoActa('sexo_div2') }}</strong><span>Sexo</span></div><div><strong>{{ datoActa('nacionalidad_div2') }}</strong><span>Nacionalidad</span></div><div><strong>{{ datoActa('curp_div2') }}</strong><span>CURP</span></div></div></section>
+              <section class="document-section"><h3>Datos del acto de divorcio</h3><div class="document-data-grid four-columns"><div><strong>{{ datoActa('ENTIDAD_REG') }}</strong><span>Entidad Federativa</span></div><div><strong>{{ datoActa('MUNICIPIO_REG') }}</strong><span>Municipio</span></div><div><strong>{{ datoActa('fecha_resolucion') }}</strong><span>Fecha</span></div><div class="resolution-field"><strong>{{ vistaPreviaViaDisolucion }}</strong><span>Vía de disolución</span>@if (textoViaDisolucion.length > 32) { <button type="button" class="notes-open" aria-label="Ver resolución completa" (click)="resolucionAbierta = true"><i class="fa-solid fa-plus" aria-hidden="true"></i></button> }</div></div></section>
             }
 
             <div class="document-split">
               <section class="document-box">
                 <h3>Anotaciones Marginales</h3>
                 @if (hayNotas) {
-                  <p>{{ datoActa('notas_marginales') }}</p>
+                  <p>{{ textoNotas }}</p>
                   <button type="button" class="notes-open" aria-label="Ver anotaciones completas" (click)="notasAbiertas = true"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 } @else { <p>Sin anotaciones marginales.</p> }
               </section>
@@ -104,26 +124,50 @@
               </section>
             </div>
 
-            @if (tipoActa === 'nacimiento') { <section class="document-box transcription-box"><h3>Transcripción</h3><p>Sin transcripción adicional.</p></section> }
+            @if (esInscripcionNacimiento) {
+              <section class="document-box transcription-box"><h3>Transcripción</h3><p>{{ vistaPreviaTranscripcion }}</p><button type="button" class="notes-open" aria-label="Ver transcripción completa" (click)="transcripcionAbierta = true"><i class="fa-solid fa-plus" aria-hidden="true"></i></button></section>
+            } @else if (tipoActa === 'nacimiento') {
+              <section class="document-box transcription-box"><h3>Transcripción</h3><p>Sin transcripción adicional.</p></section>
+            }
             <div class="document-data-grid two-columns document-bottom-row">
               <div><span>Cadena del Acta</span><strong>{{ datoActa('folio') }}</strong></div>
               <div><span>Fecha de Registro</span><strong>{{ datoActa('FECHA_REG') }}</strong></div>
             </div>
+            @if (tipoActa !== 'defuncion') {
             <div class="document-data-grid five-columns document-bottom-row">
-              <div><span>Oficialía</span><strong>{{ datoActa('OFICIALIA') }}</strong></div>
+              <div><span>Oficialía</span><strong>{{ datoActa('nooficial', 'OFICIALIA') }}</strong></div>
               <div><span>Libro</span><strong>{{ datoActa('LIBRO') }}</strong></div>
-              <div><span>Foja</span><strong>—</strong></div>
-              <div><span>Tomo</span><strong>—</strong></div>
-              <div><span>Acta</span><strong>{{ datoActa('ACTA_NUM') }}</strong></div>
+              <div><span>Foja</span><strong>{{ datoActa('FOJA', 'foja') }}</strong></div>
+              <div><span>Tomo</span><strong>{{ datoActa('TOMO', 'tomo') }}</strong></div>
+              <div><span>Acta</span><strong>{{ datoActa('ACTA_NUM', 'ACTA', 'numero_acta') }}</strong></div>
             </div>
+            }
             <p class="document-footnote"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Consulta de verificación · Registro Civil de San Luis Potosí</p>
           </article>
           @if (notasAbiertas) {
             <div class="notes-backdrop" role="presentation" (click)="notasAbiertas = false">
               <section class="notes-dialog" role="dialog" aria-modal="true" aria-labelledby="notes-title" (click)="$event.stopPropagation()">
                 <header><h2 id="notes-title">Notas</h2><button type="button" aria-label="Cerrar notas" (click)="notasAbiertas = false">×</button></header>
-                <p>{{ datoActa('notas_marginales') }}</p>
+                <p>{{ textoNotasCompleto }}</p>
                 <footer><button type="button" (click)="notasAbiertas = false">Cerrar</button></footer>
+              </section>
+            </div>
+          }
+          @if (transcripcionAbierta) {
+            <div class="notes-backdrop" role="presentation" (click)="transcripcionAbierta = false">
+              <section class="notes-dialog" role="dialog" aria-modal="true" aria-labelledby="transcription-title" (click)="$event.stopPropagation()">
+                <header><h2 id="transcription-title">Inscripción / Transcripción</h2><button type="button" aria-label="Cerrar transcripción" (click)="transcripcionAbierta = false">×</button></header>
+                <p>{{ esInscripcionNacimiento ? textoInscripcion : textoTranscripcion }}</p>
+                <footer><button type="button" (click)="transcripcionAbierta = false">Cerrar</button></footer>
+              </section>
+            </div>
+          }
+          @if (resolucionAbierta) {
+            <div class="notes-backdrop" role="presentation" (click)="resolucionAbierta = false">
+              <section class="notes-dialog" role="dialog" aria-modal="true" aria-labelledby="resolution-title" (click)="$event.stopPropagation()">
+                <header><h2 id="resolution-title">Vía de disolución</h2><button type="button" aria-label="Cerrar resolución" (click)="resolucionAbierta = false">×</button></header>
+                <p>{{ textoViaDisolucion }}</p>
+                <footer><button type="button" (click)="resolucionAbierta = false">Cerrar</button></footer>
               </section>
             </div>
           }
@@ -142,10 +186,10 @@
         <div class="search-card-heading"><span class="heading-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span><div><span>CONSULTA DE ACTA</span><h2>Búsqueda por identificador electrónico</h2></div></div>
         <div class="search-fields">
           <label for="identifier">Identificador electrónico</label>
-          <input id="identifier" name="identifier" type="text" autocomplete="off" autocapitalize="characters" maxlength="8" minlength="8" pattern="[A-Za-z0-9]{8}" required
+          <input id="identifier" name="identifier" type="text" autocomplete="off" autocapitalize="characters" maxlength="11" minlength="3" pattern="[A-Za-z]{2}[0-9]{1,9}" required
             placeholder="Ej. DD348501" [(ngModel)]="identificador" #identifierModel="ngModel">
           @if (identifierModel.invalid && (identifierModel.dirty || identifierModel.touched)) {
-            <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { El identificador debe contener exactamente 8 caracteres alfanuméricos. }</small>
+            <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { Las dos primeras posiciones deben ser letras y el GUID debe contener de 1 a 9 dígitos. }</small>
           }
 
           <label for="act-chain">Folio / código de verificación del acta</label>

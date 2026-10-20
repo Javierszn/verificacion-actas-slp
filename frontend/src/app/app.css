@@ -15,7 +15,7 @@ body { background: #fff; color: var(--ink); }
 .eyebrow { color: var(--slp-green); font-size: .7rem; font-weight: 700; letter-spacing: .16em; }
 .page-intro h1 { margin: .55rem 0 .65rem; color: #202b24; font-size: clamp(1.65rem, 3vw, 2.25rem); font-weight: 700; line-height: 1.15; }
 .page-intro p { max-width: 620px; margin: 0 auto; color: var(--muted); font-size: .9rem; line-height: 1.7; }
-.verification-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 430px); align-items: stretch; gap: clamp(1.25rem, 3vw, 2.5rem); max-width: 1040px; margin: 0 auto; }
+.verification-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(340px, 420px); align-items: stretch; gap: clamp(1.25rem, 3vw, 2.5rem); max-width: 1240px; margin: 0 auto; }
 .acta-preview { display: flex; min-height: 490px; align-items: center; justify-content: center; padding: 2.25rem; overflow: hidden; border: 1px solid #e5ebe5; border-radius: 14px; background: radial-gradient(ellipse at 50% 0%, #fff 0, #f7faf6 80%); }
 .empty-state, .result-message, .loading-state { max-width: 390px; text-align: center; }
 .document-icon, .result-icon { display: inline-grid; width: 76px; height: 76px; place-items: center; border: 1px solid #d8e8d7; border-radius: 22px; background: #edf6eb; color: var(--slp-green); font-size: 2rem; }
@@ -82,7 +82,7 @@ body { background: #fff; color: var(--ink); }
 
 /* Layout de consulta inspirado en el formato nacional, con identidad SLP. */
 .acta-preview.has-result { display: block; min-height: 680px; padding: 1rem; overflow: auto; border-radius: 4px; background: #f7f7f7; }
-.acta-document { width: 100%; max-width: 720px; margin: 0 auto; padding: .65rem; background: #fff; color: #151515; font-family: Arial, Helvetica, sans-serif; font-size: .72rem; }
+.acta-document { width: 100%; max-width: 900px; margin: 0 auto; padding: .65rem; background: #fff; color: #151515; font-family: Arial, Helvetica, sans-serif; font-size: .72rem; }
 .document-band { margin-bottom: .2rem; padding: .45rem .6rem; background: var(--slp-green); color: #fff; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-align: center; }
 .document-summary { display: grid; grid-template-columns: 1.15fr 1fr; min-height: 84px; }
 .document-summary-title { display: grid; align-content: center; gap: .45rem; padding: .45rem; text-align: center; }
@@ -93,6 +93,11 @@ body { background: #fff; color: var(--ink); }
 .document-summary-meta div { display: grid; gap: 0; text-align: center; }
 .document-summary-meta span { padding: .2rem .3rem; background: #b6b6b6; font-size: .61rem; }
 .document-summary-meta strong { padding: .17rem .3rem; background: #fff; font-size: .69rem; overflow-wrap: anywhere; }
+.document-record-header { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); margin: .1rem 0 .55rem; border: 1px solid #333; }
+.document-record-header > div { display: grid; min-width: 0; text-align: center; }
+.document-record-header > div + div { border-left: 1px solid #333; }
+.document-record-header span { padding: .2rem .15rem; background: #b6b6b6; font-size: .61rem; }
+.document-record-header strong { padding: .2rem .15rem; overflow-wrap: anywhere; font-size: .68rem; }
 .document-place { display: grid; gap: .25rem; margin: .1rem 0 1rem; text-align: center; }
 .document-place strong, .document-section h3, .document-box h3, .transcription-box h3 { margin: 0; padding: .22rem .35rem; background: #b6b6b6; color: #111; font-size: .68rem; font-weight: 700; text-align: center; }
 .document-place span { min-height: 26px; font-weight: 700; }
@@ -107,6 +112,8 @@ body { background: #fff; color: var(--ink); }
 .five-columns { grid-template-columns: repeat(5,minmax(0,1fr)); }
 .two-columns { grid-template-columns: repeat(2,minmax(0,1fr)); }
 .four-columns { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.resolution-field { position: relative; }
+.resolution-field .notes-open { right: .15rem; bottom: .15rem; width: 16px; height: 16px; }
 .document-split { display: grid; grid-template-columns: 1fr 1.45fr; margin: .7rem 0 .85rem; border: 1px solid #555; }
 .document-box { position: relative; min-width: 0; min-height: 105px; border-right: 1px solid #555; }
 .document-box:last-child { border-right: 0; }
@@ -117,6 +124,8 @@ body { background: #fff; color: var(--ink); }
 .document-box small { display: block; margin: 0 .55rem .55rem; color: #555; font-size: .6rem; line-height: 1.4; }
 .notes-open { position: absolute; right: .35rem; bottom: .35rem; display: grid; width: 20px; height: 20px; place-items: center; border: 0; border-radius: 2px; background: var(--slp-green); color: #fff; cursor: pointer; }
 .transcription-box { min-height: 48px; margin-bottom: .85rem; border: 1px solid #555; }
+.inscription-transcription { min-height: 150px; }
+.inscription-transcription p { white-space: pre-wrap; }
 .transcription-box p { margin: .25rem .4rem; }
 .document-bottom-row { margin-bottom: .85rem; border-top: 1px solid #888; }
 .document-bottom-row > div { min-height: 0; justify-content: stretch; padding: 0; border: 1px solid #555; }
@@ -131,4 +140,4 @@ body { background: #fff; color: var(--ink); }
 .notes-dialog > p { margin: 1rem; color: #252525; font-size: .75rem; line-height: 1.55; white-space: pre-wrap; }
 .notes-dialog footer { display: flex; justify-content: flex-end; padding: .7rem 1rem; border-top: 1px solid #ddd; }
 .notes-dialog footer button { padding: .45rem .9rem; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; }
-@media (max-width: 700px) { .acta-preview.has-result { min-height: 0; padding: .45rem; } .acta-document { padding: .4rem; } .document-data-grid > div { min-height: 72px; } .document-data-grid strong { font-size: .6rem; } .document-data-grid span { font-size: .55rem; } .document-split { grid-template-columns: 1fr; } .document-box { border-right: 0; border-bottom: 1px solid #555; } .document-box:last-child { border-bottom: 0; } }
+@media (max-width: 700px) { .acta-preview.has-result { min-height: 0; padding: .45rem; } .acta-document { padding: .4rem; } .document-data-grid > div { min-height: 72px; } .document-data-grid strong { font-size: .6rem; } .document-data-grid span { font-size: .55rem; } .document-record-header span { font-size: .52rem; } .document-record-header strong { font-size: .58rem; } .document-split { grid-template-columns: 1fr; } .document-box { border-right: 0; border-bottom: 1px solid #555; } .document-box:last-child { border-bottom: 0; } }
