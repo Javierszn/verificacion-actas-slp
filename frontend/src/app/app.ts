@@ -1,9 +1,24 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription, TimeoutError, finalize, timeout } from 'rxjs';
 
 type TipoActa = 'nacimiento' | 'inscripcionNacimiento' | 'matrimonio' | 'defuncion' | 'divorcio';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        callback: (token: string) => void;
+        'expired-callback': () => void;
+        'error-callback': () => void;
+        theme: 'light' | 'dark' | 'auto';
+      }) => string;
+      reset: (widgetId?: string) => void;
+    };
+  }
+}
 
 interface VerificarActaResponse {
   tipoActa: TipoActa;
@@ -16,26 +31,74 @@ interface VerificarActaResponse {
   imports: [FormsModule],
   templateUrl: './app.html'
 })
-export class App {
+export class App implements AfterViewInit {
   private readonly http = inject(HttpClient);
   private readonly changeDetector = inject(ChangeDetectorRef);
-  private readonly apiUrl = 'https://localhost:7254/api/actas/verificar';
+  private readonly zone = inject(NgZone);
+  private readonly apiUrl = window.location.port === '4200' ? 'https://localhost:7254/api/actas/verificar' : '/verificacion-actas-api/api/actas/verificar';
+  private readonly turnstileSiteKey = '0x4AAAAAAFd_7H_2mvrk0jqW';
+  private turnstileWidgetId?: string;
   private consultaActa?: Subscription;
   private consultaId = 0;
 
   identificador = '';
   cadenaActa = '';
-  codigoVerificacion = '';
+  turnstileToken = '';
+  turnstileError = '';
   tipoActa: TipoActa = 'nacimiento';
   cargando = false;
   mensajeConsulta = '';
   resultadoActa: Record<string, unknown> | null = null;
+  mostrarAvisoCajeros = true;
   notasAbiertas = false;
   transcripcionAbierta = false;
   resolucionAbierta = false;
 
   get selloPresente(): boolean {
     return this.resultadoActa !== null;
+  }
+
+  ngAfterViewInit(): void {
+    const renderWidget = () => {
+      const widget = window.turnstile;
+      const container = document.getElementById('turnstile-widget');
+      if (!widget || !container || this.turnstileWidgetId) return;
+      this.turnstileWidgetId = widget.render(container, {
+        sitekey: this.turnstileSiteKey,
+        theme: 'light',
+        callback: (token) => this.zone.run(() => {
+          this.turnstileToken = token;
+          this.turnstileError = '';
+          this.changeDetector.markForCheck();
+        }),
+        'expired-callback': () => this.zone.run(() => {
+          this.turnstileToken = '';
+          this.turnstileError = 'La verificación expiró. Completa el CAPTCHA nuevamente.';
+          this.changeDetector.markForCheck();
+        }),
+        'error-callback': () => this.zone.run(() => {
+          this.turnstileToken = '';
+          this.turnstileError = 'No se pudo cargar la verificación. Recarga la página e inténtalo de nuevo.';
+          this.changeDetector.markForCheck();
+        })
+      });
+    };
+
+    if (window.turnstile) {
+      renderWidget();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.onload = renderWidget;
+    script.onerror = () => {
+      this.turnstileError = 'No se pudo cargar la verificación. Revisa tu conexión e inténtalo de nuevo.';
+      this.changeDetector.markForCheck();
+    };
+    document.head.appendChild(script);
   }
 
   get tituloActa(): string {
@@ -167,9 +230,18 @@ export class App {
     this.changeDetector.markForCheck();
   }
 
+  cerrarAvisoCajeros(): void {
+    this.mostrarAvisoCajeros = false;
+    this.changeDetector.markForCheck();
+  }
+
   buscar(event: Event): void {
     event.preventDefault();
     if (this.cargando) return;
+    if (!this.turnstileToken) {
+      this.turnstileError = 'Completa la verificación para continuar.';
+      return;
+    }
 
     this.consultaActa?.unsubscribe();
     const consultaId = ++this.consultaId;
@@ -179,12 +251,15 @@ export class App {
 
     this.consultaActa = this.http.post<VerificarActaResponse>(this.apiUrl, {
       identificador: this.identificador.trim().toUpperCase(),
-      cadenaActa: this.cadenaActa.trim()
+      cadenaActa: this.cadenaActa.trim(),
+      turnstileToken: this.turnstileToken
     }).pipe(
       timeout({ first: 20000 }),
       finalize(() => {
         if (consultaId === this.consultaId) {
           this.cargando = false;
+          this.turnstileToken = '';
+          window.turnstile?.reset(this.turnstileWidgetId);
           this.changeDetector.markForCheck();
         }
       })
@@ -219,7 +294,9 @@ export class App {
     this.consultaActa = undefined;
     this.identificador = '';
     this.cadenaActa = '';
-    this.codigoVerificacion = '';
+    this.turnstileToken = '';
+    this.turnstileError = '';
+    window.turnstile?.reset(this.turnstileWidgetId);
     this.cargando = false;
     this.mensajeConsulta = '';
     this.resultadoActa = null;

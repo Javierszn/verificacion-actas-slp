@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using MySqlConnector;
@@ -9,8 +10,9 @@ namespace backend.Controllers;
 [Route("api/actas")]
 public sealed class VerificacionActaController(
     MySqlDataSource dataSource,
-    ILogger<VerificacionActaController> logger,
-    IWebHostEnvironment environment) : ControllerBase
+    IHttpClientFactory httpClientFactory,
+    IConfiguration configuration,
+    ILogger<VerificacionActaController> logger) : ControllerBase
 {
     private static readonly Regex IdentifierPattern = new("^[A-Za-z]{2}[0-9]{1,9}$", RegexOptions.Compiled);
     private static readonly Regex FolioPattern = new("^[0-9]{20}$", RegexOptions.Compiled);
@@ -27,13 +29,50 @@ public sealed class VerificacionActaController(
     [EnableRateLimiting("ConsultaActas")]
     public async Task<IActionResult> Verificar([FromBody] VerificarActaRequest request, CancellationToken cancellationToken)
     {
-        // El CAPTCHA de la interfaz es solo una maqueta. No habilitar consultas
-        // públicas hasta integrar validación real en el servidor.
-        if (!environment.IsDevelopment()) return NotFound();
-
         if (request is null || !IdentifierPattern.IsMatch(request.Identificador ?? "")
             || !FolioPattern.IsMatch(request.CadenaActa ?? ""))
             return BadRequest(new { mensaje = "Los datos de búsqueda no tienen un formato válido." });
+
+        var secretKey = configuration["Turnstile:SecretKey"];
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            logger.LogError("No está configurada la clave secreta de Cloudflare Turnstile.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { mensaje = "La verificación de seguridad no está configurada." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.TurnstileToken))
+            return BadRequest(new { mensaje = "Completa la verificación de seguridad." });
+
+        try
+        {
+            using var response = await httpClientFactory.CreateClient().PostAsync(
+                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+                new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["secret"] = secretKey,
+                    ["response"] = request.TurnstileToken,
+                    ["remoteip"] = HttpContext.Connection.RemoteIpAddress?.ToString() ?? ""
+                }),
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Cloudflare Turnstile respondió con estado HTTP {StatusCode}.", response.StatusCode);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    new { mensaje = "No se pudo validar la verificación de seguridad." });
+            }
+
+            var validation = await response.Content.ReadFromJsonAsync<TurnstileValidation>(cancellationToken);
+            if (validation?.Success != true)
+                return BadRequest(new { mensaje = "La verificación expiró o no fue válida. Inténtalo nuevamente." });
+        }
+        catch (HttpRequestException exception)
+        {
+            logger.LogError(exception, "No fue posible validar el token con Cloudflare Turnstile.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { mensaje = "No se pudo validar la verificación de seguridad." });
+        }
 
         // Las dos primeras letras identifican dirección/cajero; el sufijo de 1-9 dígitos es el GUID.
         var guid = request.Identificador![2..];
@@ -86,4 +125,5 @@ public sealed class VerificacionActaController(
     }
 }
 
-public sealed record VerificarActaRequest(string? Identificador, string? CadenaActa);
+public sealed record VerificarActaRequest(string? Identificador, string? CadenaActa, string? TurnstileToken);
+public sealed record TurnstileValidation(bool Success);

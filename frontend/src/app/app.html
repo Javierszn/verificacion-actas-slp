@@ -1,4 +1,13 @@
 <div class="app-frame">
+  @if (mostrarAvisoCajeros) {
+    <div class="kiosk-notice-backdrop" role="presentation" (click)="cerrarAvisoCajeros()"></div>
+    <section class="kiosk-notice-modal" role="dialog" aria-modal="true" aria-labelledby="kiosk-notice-title" (click)="$event.stopPropagation()">
+      <button type="button" class="kiosk-notice-close" aria-label="Cerrar aviso" (click)="cerrarAvisoCajeros()">×</button>
+      <h2 id="kiosk-notice-title" class="visually-hidden">Aviso para usuarios de cajeros electrónicos</h2>
+      <img src="images/Cajeros RC.png" alt="Consulta y verifica tu acta expedida en kioscos y cajeros electrónicos del Estado de San Luis Potosí">
+      <button type="button" class="kiosk-notice-continue" (click)="cerrarAvisoCajeros()">Continuar a la consulta</button>
+    </section>
+  }
   <header class="site-header">
     <div class="container header-content">
       <a href="https://registrocivil.slp.gob.mx/" class="government-logo" aria-label="Portal del Registro Civil de San Luis Potosí">
@@ -187,7 +196,7 @@
         <div class="search-fields">
           <label for="identifier">Identificador electrónico</label>
           <input id="identifier" name="identifier" type="text" autocomplete="off" autocapitalize="characters" maxlength="11" minlength="3" pattern="[A-Za-z]{2}[0-9]{1,9}" required
-            placeholder="Ej. DD348501" [(ngModel)]="identificador" #identifierModel="ngModel">
+            placeholder="Ej. DD12345" [(ngModel)]="identificador" #identifierModel="ngModel">
           @if (identifierModel.invalid && (identifierModel.dirty || identifierModel.touched)) {
             <small class="validation-error">@if (identifierModel.errors?.['required']) { Es necesario proporcionar el Identificador Electrónico completo. } @else { Las dos primeras posiciones deben ser letras y el GUID debe contener de 1 a 9 dígitos. }</small>
           }
@@ -199,10 +208,9 @@
             <small class="validation-error">@if (cadenaModel.errors?.['required']) { Es necesario proporcionar la cadena del acta. } @else { La cadena del acta debe contener exactamente 20 números. }</small>
           }
 
-          <label class="captcha-label" for="captcha-entry">Código de verificación</label>
-          <input id="captcha-entry" name="captcha-entry" type="text" autocomplete="off" maxlength="12" required
-            placeholder="Escribe el código mostrado" [(ngModel)]="codigoVerificacion">
-          <div class="captcha-preview" aria-label="Vista previa del espacio para CAPTCHA; aún no valida respuestas"><span class="captcha-noise" aria-hidden="true">CAPTCHA</span><span class="captcha-actions" aria-hidden="true"><i class="fa-solid fa-rotate"></i><i class="fa-solid fa-volume-high"></i></span></div>
+          <label class="captcha-label">Verificación de seguridad</label>
+          <div id="turnstile-widget" class="turnstile-widget" aria-label="Verificación de seguridad de Cloudflare"></div>
+          @if (turnstileError) { <small class="validation-error" role="alert">{{ turnstileError }}</small> }
           <div class="form-actions">
             <button type="button" class="btn-cancel" (click)="cancelar()"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Cancelar</button>
             <button type="submit" class="btn-search" [disabled]="cargando"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Buscar acta</button>

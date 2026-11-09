@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
 
 var connectionString = builder.Configuration.GetConnectionString("Actas")
     ?? throw new InvalidOperationException(
